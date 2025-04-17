@@ -4,35 +4,72 @@
     <meta charset="UTF-8">
     <title>幸运选菜大转盘</title>
     <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
         .container {
             text-align: center;
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         #inputSection {
             margin: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
 
         #dishInput {
-            padding: 10px;
-            width: 200px;
-            margin-right: 10px;
+            padding: 12px 15px;
+            width: 250px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #dishInput:focus {
+            border-color: #4CAF50;
+            outline: none;
         }
 
         button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             background: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         #wheelContainer {
             position: relative;
             width: 400px;
             height: 400px;
-            margin: 0 auto;
+            margin: 30px auto;
         }
 
         #wheel {
@@ -43,6 +80,8 @@
             overflow: hidden;
             transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
             border: 4px solid #333;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
         .slice {
@@ -50,11 +89,63 @@
             width: 50%;
             height: 50%;
             transform-origin: 100% 100%;
-            background: linear-gradient(45deg, #fff, #f0f0f0);
+            background: linear-gradient(45deg, #fff, #f9f9f9);
+            border: 1px solid #eee;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .slice:hover {
+            filter: brightness(0.97);
+        }
+
+        .slice-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #ddd;
+            transform-origin: center;
+        }
+
+        .slice-text {
+            width: 80%;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.3;
+            word-break: break-word;
+            padding: 5px;
+        }
+
+        .delete-dish {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .slice:hover .delete-dish {
+            opacity: 1;
         }
 
         #spinBtn {
@@ -62,55 +153,259 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             background: #ff4444;
             cursor: pointer;
             border: none;
             color: white;
             font-weight: bold;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 10;
+            font-size: 18px;
+        }
+
+        #spinBtn:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: #ff3333;
         }
 
         #result {
-            font-size: 24px;
-            margin-top: 20px;
+            font-size: 26px;
+            margin: 25px 0;
             color: #333;
+            min-height: 40px;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        #dishList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 25px 0;
+        }
+
+        .dish-item {
+            background: #e8f5e9;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dish-item button {
+            background: #ff4444;
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #historySection {
+            margin: 40px auto;
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        #historyList {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .historyItem {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #f8f8f8;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .historyItem:hover {
+            background: #f0f0f0;
+        }
+
+        .deleteHistory {
+            color: #ff4444;
+            cursor: pointer;
+            margin-left: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 0 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @media (max-width: 600px) {
+            #wheelContainer {
+                width: 300px;
+                height: 300px;
+            }
+
+            #dishInput {
+                width: 100%;
+            }
+
+            .container {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1> 幸运选菜大转盘 </h1>
+
         <div id="inputSection">
-            <input type="text" id="dishInput" placeholder="输入菜品名称">
-            <button onclick="addDish()">添加菜品</button>
-            <button onclick="clearAll()">清空列表</button>
+            <input type="text" id="dishInput" placeholder="输入菜品名称 (按Enter添加)">
+            <button onclick="addDish()"> 添加菜品</button>
+            <button onclick="clearAll()"> 清空列表</button>
         </div>
+
+        <div id="dishList"></div>
+
         <div id="wheelContainer">
             <div id="wheel"></div>
             <button id="spinBtn" onclick="spin()">GO</button>
         </div>
-        <div id="result"></div>
+
+        <div id="result" class="fade-in"></div>
+
+        <div id="historySection">
+            <h3> 操作历史</h3>
+            <ul id="historyList"></ul>
+        </div>
     </div>
 
     <script>
-        let dishes = [];
+        // 初始化数据（带本地存储）
+        let dishes = JSON.parse(localStorage.getItem('dishes')) || [];
+        let history = JSON.parse(localStorage.getItem('history')) || [];
         let rotation = 0;
         let isSpinning = false;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateWheel();
+            updateDishList();
+            updateHistory();
+
+            // 回车键添加菜品
+            document.getElementById('dishInput').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') addDish();
+            });
+
+            // 输入框自动聚焦
+            document.getElementById('dishInput').focus();
+        });
 
         function addDish() {
             const input = document.getElementById('dishInput');
             const dish = input.value.trim();
+
             if (dish) {
+                if (dishes.includes(dish)) {
+                    alert('该菜品已存在！');
+                    return;
+                }
+
+                if (dishes.length >= 12) {
+                    alert('最多添加12个菜品！');
+                    return;
+                }
+
                 dishes.push(dish);
                 input.value = '';
+
+                // 记录历史
+                history.unshift({
+                    type: 'add',
+                    dish: dish,
+                    time: new Date().toLocaleString()
+                });
+                if(history.length > 20) history.pop();
+
+                saveData();
                 updateWheel();
+                updateDishList();
+                updateHistory();
+                input.focus();
             }
         }
 
-        function clearAll() {
-            dishes = [];
+        function removeDish(index) {
+            const removedDish = dishes[index];
+            dishes.splice(index, 1);
+
+            // 记录删除历史
+            history.unshift({
+                type: 'remove',
+                dish: removedDish,
+                time: new Date().toLocaleString()
+            });
+            if(history.length > 20) history.pop();
+
+            saveData();
             updateWheel();
+            updateDishList();
+            updateHistory();
+        }
+
+        function clearAll() {
+            if(dishes.length === 0) return;
+
+            if(!confirm('确定要清空所有菜品吗？')) return;
+
+            // 记录清空历史
+            history.unshift({
+                type: 'clear',
+                count: dishes.length,
+                time: new Date().toLocaleString()
+            });
+            if(history.length > 20) history.pop();
+
+            dishes = [];
+            saveData();
+            updateWheel();
+            updateDishList();
+            updateHistory();
+            document.getElementById('result').textContent = '';
+        }
+
+        function saveData() {
+            localStorage.setItem('dishes', JSON.stringify(dishes));
+            localStorage.setItem('history', JSON.stringify(history));
         }
 
         function updateWheel() {
@@ -118,32 +413,161 @@
             wheel.innerHTML = '';
             const count = dishes.length;
 
+            if(count === 0) {
+                wheel.style.background = '#f5f5f5';
+                const placeholder = document.createElement('div');
+                placeholder.style.display = 'flex';
+                placeholder.style.alignItems = 'center';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.height = '100%';
+                placeholder.style.color = '#999';
+                placeholder.textContent = '请添加菜品';
+                wheel.appendChild(placeholder);
+                return;
+            }
+
             dishes.forEach((dish, index) => {
                 const slice = document.createElement('div');
                 slice.className = 'slice';
-                slice.textContent = dish;
-                const rotate = (index * 360) / count;
-                slice.style.transform = `rotate(${rotate}deg) skewY(${90 - (180/count)}deg)`;
+
+                // 计算基础角度
+                const sliceAngle = 360 / count;
+                const rotateAngle = index * sliceAngle;
+                const skewAngle = 90 - sliceAngle;
+
+                // 扇形变换
+                slice.style.transform = `rotate(${rotateAngle}deg) skewY(${skewAngle}deg)`;
+
+                // 创建内容容器
+                const content = document.createElement('div');
+                content.className = 'slice-content';
+
+                // 关键修正：调整变换顺序和角度
+                content.style.transform = `
+                    skewY(${-skewAngle}deg)
+                    rotate(${sliceAngle/2}deg)
+                `;
+                content.style.transformOrigin = 'center';
+
+                // 文字容器
+                const textSpan = document.createElement('div');
+                textSpan.className = 'slice-text';
+                textSpan.style.transform = `skewY(${skewAngle}deg) rotate(${-sliceAngle/2}deg)`;
+
+                // 动态字体大小
+                const fontSize = Math.max(14, Math.min(24, 180 / dish.length));
+                textSpan.style.fontSize = `${fontSize}px`;
+                textSpan.textContent = dish;
+
+                // 添加删除按钮
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-dish';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeDish(index);
+                };
+
+                content.appendChild(textSpan);
+                slice.appendChild(content);
+                slice.appendChild(deleteBtn);
                 wheel.appendChild(slice);
             });
         }
 
+        function updateDishList() {
+            const list = document.getElementById('dishList');
+            list.innerHTML = dishes.map((dish, index) => `
+                <div class="dish-item">
+                    <span>${dish}</span>
+                    <button onclick="removeDish(${index})" title="删除">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = history.map((record, index) => {
+                let actionText = '';
+                let icon = '';
+
+                if(record.type === 'add') {
+
+                    actionText = `添加了：${record.dish}`;
+                } else if(record.type === 'remove') {
+
+                    actionText = `删除了：${record.dish}`;
+                } else if(record.type === 'clear') {
+
+                    actionText = `清空了全部 ${record.count} 个菜品`;
+                } else if(record.type === 'selected') {
+
+                    actionText = `抽中了：${record.dish}`;
+                }
+
+                return `
+                    <li class="historyItem">
+                        <span>${icon} ${record.time} ${actionText}</span>
+                        <span class="deleteHistory" onclick="deleteHistory(${index})" title="删除记录">×</span>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function deleteHistory(index) {
+            history.splice(index, 1);
+            saveData();
+            updateHistory();
+        }
+
         function spin() {
-            if (dishes.length < 2 || isSpinning) return;
+            if (dishes.length < 2) {
+                alert('请至少添加2个菜品！');
+                return;
+            }
+
+            if (isSpinning) return;
 
             isSpinning = true;
             const wheel = document.getElementById('wheel');
             const resultDiv = document.getElementById('result');
-            const randomSpin = Math.floor(Math.random() * 3600) + 1440;
+            const spinBtn = document.getElementById('spinBtn');
+
+            // 禁用按钮
+            spinBtn.disabled = true;
+            spinBtn.textContent = '...';
+
+            // 随机旋转圈数 (4-10圈)
+            const randomSpin = Math.floor(Math.random() * 2160) + 1440;
             const finalRotation = rotation + randomSpin;
 
+            // 重置结果样式
+            resultDiv.textContent = '';
+            resultDiv.classList.remove('fade-in');
+
+            // 开始旋转
             wheel.style.transform = `rotate(${finalRotation}deg)`;
             rotation = finalRotation % 360;
 
+            // 旋转结束后
             setTimeout(() => {
                 const selectedIndex = Math.floor((360 - rotation % 360) / (360 / dishes.length)) % dishes.length;
-                resultDiv.textContent = `今日推荐：${dishes[selectedIndex]} 🎉`;
+                resultDiv.textContent = ` 今日推荐：${dishes[selectedIndex]} `;
+                resultDiv.classList.add('fade-in');
+
+                // 恢复按钮状态
+                spinBtn.disabled = false;
+                spinBtn.textContent = 'GO';
                 isSpinning = false;
+
+                // 记录选中历史
+                history.unshift({
+                    type: 'selected',
+                    dish: dishes[selectedIndex],
+                    time: new Date().toLocaleString()
+                });
+                saveData();
+                updateHistory();
             }, 4000);
         }
     </script>

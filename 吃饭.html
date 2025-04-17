@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>幸运选菜大转盘</title>
+    <style>
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #inputSection {
+            margin: 20px;
+        }
+
+        #dishInput {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #wheelContainer {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            border: 4px solid #333;
+        }
+
+        .slice {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+        }
+
+        #spinBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ff4444;
+            cursor: pointer;
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+
+        #result {
+            font-size: 24px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="inputSection">
+            <input type="text" id="dishInput" placeholder="输入菜品名称">
+            <button onclick="addDish()">添加菜品</button>
+            <button onclick="clearAll()">清空列表</button>
+        </div>
+        <div id="wheelContainer">
+            <div id="wheel"></div>
+            <button id="spinBtn" onclick="spin()">GO</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let dishes = [];
+        let rotation = 0;
+        let isSpinning = false;
+
+        function addDish() {
+            const input = document.getElementById('dishInput');
+            const dish = input.value.trim();
+            if (dish) {
+                dishes.push(dish);
+                input.value = '';
+                updateWheel();
+            }
+        }
+
+        function clearAll() {
+            dishes = [];
+            updateWheel();
+        }
+
+        function updateWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            const count = dishes.length;
+
+            dishes.forEach((dish, index) => {
+                const slice = document.createElement('div');
+                slice.className = 'slice';
+                slice.textContent = dish;
+                const rotate = (index * 360) / count;
+                slice.style.transform = `rotate(${rotate}deg) skewY(${90 - (180/count)}deg)`;
+                wheel.appendChild(slice);
+            });
+        }
+
+        function spin() {
+            if (dishes.length < 2 || isSpinning) return;
+
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const resultDiv = document.getElementById('result');
+            const randomSpin = Math.floor(Math.random() * 3600) + 1440;
+            const finalRotation = rotation + randomSpin;
+
+            wheel.style.transform = `rotate(${finalRotation}deg)`;
+            rotation = finalRotation % 360;
+
+            setTimeout(() => {
+                const selectedIndex = Math.floor((360 - rotation % 360) / (360 / dishes.length)) % dishes.length;
+                resultDiv.textContent = `今日推荐：${dishes[selectedIndex]} 🎉`;
+                isSpinning = false;
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
